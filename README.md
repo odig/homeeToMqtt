@@ -51,7 +51,7 @@ MQTT messages are easily to subscribe in Node-Red, Homebridge or Hass.io
     }
 
 #### MQTT subscribed topics from homeeToMqtt
-    homee/devices/[DeviceId]/attributes/[AttributeId]
+    homee/devices/[DeviceId]/set/attributes/[AttributeId]
 
 ##### Example Topic
     homee/devices/200/set/attributes/1051
