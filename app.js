@@ -113,7 +113,8 @@ function generateAttributeInfo(nodeId, attribute) {
                         type == 'OnOff' ||
                         type == 'Brightness' ||
                         type == 'TargetTemperature' ||
-                        type == 'CurrentPosition'
+                        type == 'CurrentPosition' ||
+                        type == 'ColorTemperature'
                     ) {
                         var subscribeString = 'homee/devices/set/' + nodeId.toString() + '/attributes/' + id.toString()
                         mqttConnection.subscribe(subscribeString, null, function (err, granted) {
