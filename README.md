@@ -32,10 +32,10 @@ Create a config.json in same folder ad the app and adjust it to your needs
 
 ## MQTT
 ### published topics from homeeToMqtt
-    homee/devices/[DeviceId]/attributes/[AttributeId]
+    homee/devices/status/[DeviceId]/attributes/[AttributeId]
 
 ##### Example Topic
-    homee/devices/200/attributes/1051
+    homee/devices/status/200/attributes/1051
 
 ##### Example Topic
     Payload:
@@ -65,10 +65,10 @@ Create a config.json in same folder ad the app and adjust it to your needs
     }
 
 #### MQTT subscribed topics from homeeToMqtt
-    homee/devices/[DeviceId]/set/attributes/[AttributeId]
+    homee/devices/set/[DeviceId]/attributes/[AttributeId]
 
 ##### Example Topic
-    homee/devices/200/set/attributes/1051
+    homee/devices/set/200/attributes/1051
 
 ##### Example Topic
     1
