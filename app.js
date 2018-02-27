@@ -1,10 +1,31 @@
+// sample config.json
+/*
+{
+  "homeeUserName": "mqtt",
+  "homeePassword": "mqtt",
+  "homeeServer": "homee.fritz.box",
+  "mqttServer": "matt.fritz.box",
+  "mqttUserName": "mqtt",
+  "mqttPassword": "mqtt",
+  "publish": true,
+  "subscribe": true
+}
+*/
+
 // config
-const homee_userName = 'user'
-const homee_password = 'password'
-const homee_ip = 'homee.fritz.box'
-const mqtt_server = "mqtt.fritz.box"
-const mqtt_userName = "user"
-const mqtt_password = "password"
+var config = require('config.json')('./config.json')
+
+if (config.homeeUserName == null) config.homeeUserName = 'mqtt'
+if (config.homeePassword == null) config.homeePassword = 'mqtt'
+if (config.homeeServer == null) config.homeeServer = 'homee'
+if (config.mqttServer == null) config.mqttServer = 'mqtt'
+if (config.mqttUserName == null) config.mqttUserName = 'mqtt'
+if (config.mqttPassword == null) config.mqttPassword = 'mqtt'
+if (config.subscribe == null) config.subscribe = true
+if (config.publish == null) config.publish = true
+
+console.log('Config:')
+console.log(JSON.stringify(config, null, 4))
 
 //libs
 const fetch = require('node-fetch')
@@ -16,15 +37,15 @@ const mqtt = require('mqtt')
 
 //const
 const token_expires = 0
-const homee_user = querystring.escape(homee_userName)
-const homee_pass = sha512(homee_password) //'8b6717d4a69717640022f88307d828d95ce99bce944f418e58445d1c65cd5fe00f5cb774d8f26fd7c56dd95942b3e29463f880be78514fc8dfd78807d3b20dbc'
+const homeeUser = querystring.escape(config.homeeUserName)
+const homeePassword = sha512(config.homeePassword) //'8b6717d4a69717640022f88307d828d95ce99bce944f418e58445d1c65cd5fe00f5cb774d8f26fd7c56dd95942b3e29463f880be78514fc8dfd78807d3b20dbc'
 
 //vars
 var mqttAvailable = false
 var mySocket = null
 
 //node nodes
-nodes=[]
+nodes = []
 
 //emulate btoa
 global.Buffer = global.Buffer || require('buffer').Buffer
@@ -42,7 +63,7 @@ if (typeof atob === 'undefined') {
 
 //the real stuff
 function generateAttributeInfo(nodeId, attribute) {
-    var changed=true
+    var changed = true
     if (nodes[nodeId] != null) {
         var type = homee.getHAPTypeByAttributeType(attribute.type)
         var id = attribute.id
@@ -67,7 +88,11 @@ function generateAttributeInfo(nodeId, attribute) {
         nodes[nodeId].attributes[id].data = data
 
         if (changed) {
-            console.log('(' + nodeId + ')'+ '"' + nodes[nodeId].name + '", ', '(' + id + ')' + type + ', ', data+unit)
+            console.log(
+                '(' + nodeId + ')' + '"' + nodes[nodeId].name + '", ',
+                '(' + id + '/' + attribute.type + ')' + type + ', ',
+                data + unit
+            )
             //console.log(JSON.stringify(attribute,null,4))
             if (mqttAvailable) {
                 var mqttJson = Object.assign(attribute)
@@ -76,11 +101,26 @@ function generateAttributeInfo(nodeId, attribute) {
                 mqttJson.note = nodes[nodeId].note
                 mqttJson.unit = unit
                 mqttJson.data = data
-                //console.log('homee/devices/' + nodeId.toString() + '/attributes/' + id.toString(), JSON.stringify(mqttJson, null, 4))
-                client.publish('homee/devices/' + nodeId.toString() + '/attributes/' + id.toString(), JSON.stringify(mqttJson))
-                if(type == 'OnOff') {
-                    console.log('\tsubscribe: ', 'homee/devices/' + nodeId.toString() + '/set/attributes/' + id.toString())
-                    client.subscribe('homee/devices/' + nodeId.toString() + '/set/attributes/' + id.toString())
+                if (config.publish) {
+                    var publishString = 'homee/devices/status/' + nodeId.toString() + '/attributes/' + id.toString()
+                    //console.log(publishString, JSON.stringify(mqttJson, null, 4))
+                    client.publish(publishString, JSON.stringify(mqttJson))
+                }
+                if (config.subscribe) {
+                    if (
+                        type == 'OnOff' ||
+                        type == 'Brightness' ||
+                        type == 'TargetTemperature' ||
+                        type == 'CurrentPosition'
+                    ) {
+                        var subscribeString = 'homee/devices/set/' + nodeId.toString() + '/attributes/' + id.toString()
+                        client.subscribe(subscribeString, null, function (err, granted) {
+                            if (!err) {
+                                console.log(nodeId + ' "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
+                            }
+                        }
+                        )
+                    }
                 }
             }
         }
@@ -96,19 +136,19 @@ function generateNodeInfo(node) {
     var cubeType
     switch (node.cube_type) {
         case 1:
-            cubeType = "Zwave"
+            cubeType = 'Zwave'
             break
         case 2:
-            cubeType = "Zigbee"
+            cubeType = 'Zigbee'
             break
         case 3:
-            cubeType = "EnOcean"
+            cubeType = 'EnOcean'
             break
         case 8:
-            cubeType = "Wlan"
+            cubeType = 'Wlan'
             break
         default:
-            cubeType = "Unknown"
+            cubeType = 'Unknown'
             break
     }
 
@@ -124,7 +164,7 @@ function generateNodeInfo(node) {
     nodes[node.id].cubeType = cubeType
     nodes[node.id].name = querystring.unescape(node.name)
     nodes[node.id].note = querystring.unescape(node.note)
-    nodes[node.id].attributes = [] 
+    nodes[node.id].attributes = []
 
     for (var key in node.attributes) {
         generateAttributeInfo(node.id, node.attributes[key])
@@ -157,47 +197,55 @@ function muxCommand(command) {
 }
 
 var headers = {
-    "Content-Type": 'application/x-www-form-urlencoded',
-    "Authorization": 'Basic ' + btoa(homee_user + ":" + homee_pass)
+    'Content-Type': 'application/x-www-form-urlencoded',
+    Authorization: 'Basic ' + btoa(homeeUser + ':' + homeePassword)
 }
-console.log('headers: ' + JSON.stringify(headers, null, 4))
+//console.log('headers: ' + JSON.stringify(headers, null, 4))
 
 var data = {
-    'device_name': 'homebridge',
-    'device_hardware_id': 'homebridge',
-    'device_os': 5,
-    'device_type': 3,
-    'device_app': 1
+    device_name: 'homeeToMqtt',
+    device_hardware_id: 'homeeToMqtt',
+    device_os: 5,
+    device_type: 3,
+    device_app: 1
 }
-console.log('data: ' + JSON.stringify(data, null, 4))
+//console.log('data: ' + JSON.stringify(data, null, 4))
 
-const urlData = Object.keys(data).map(function (key) {
-    return encodeURIComponent(key) + '=' + encodeURIComponent(data[key])
-}).join('&')
-console.log('data: ' + urlData)
+const urlData = Object.keys(data)
+    .map(function (key) {
+        return encodeURIComponent(key) + '=' + encodeURIComponent(data[key])
+    })
+    .join('&')
+//console.log('data: ' + urlData)
 
-var url = 'http://' + homee_ip + ':7681/access_token'
-console.log('url: ' + url)
+var url = 'http://' + config.homeeServer + ':7681/access_token'
+//console.log('url: ' + url)
 
-const client = mqtt.connect('mqtt://' + mqtt_server, {username: mqtt_userName, password:mqtt_password})
+const client = mqtt.connect('mqtt://' + config.mqttServer, {
+    username: config.mqttUserName,
+    password: config.mqttPassword
+})
+
 client.on('connect', function () {
     mqttAvailable = true
     fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: headers,
         body: urlData
-    })
-    .then(function (response) {
+    }).then(function (response) {
         return response.text()
-    })
-    .then(function (data) {
-        console.log(data)
+    }).then(function (data) {
+        //console.log(data)
         var token = data.match(/access_token=([^&]*)/)
-        console.log("token=" + token[1])
-        var connection = 'ws://' + homee_ip + ':7681/connection?access_token=' + token[1]
+        //console.log('token=' + token[1])
+        var connection =
+            'ws://' +
+            config.homeeServer +
+            ':7681/connection?access_token=' +
+            token[1]
         //Create new WebSocket
         mySocket = new WebSocket(connection, ['v2'])
-        console.log(mySocket)
+        //console.log(mySocket)
         // Attach listeners
         mySocket.onmessage = function (event) {
             var j = JSON.parse(event.data)
@@ -205,49 +253,72 @@ client.on('connect', function () {
             //console.log(JSON.stringify(j, null, 4))
         }
         mySocket.onopen = function (event) {
-            console.log("open")
+            console.log('websocket: open')
+            console.log('----------------------------------------')
             mySocket.send('GET:all')
         }
         mySocket.onclose = function (event) {
-            console.log("close")
+            console.log('websocket: close')
         }
         mySocket.onerror = function (event) {
-            console.log("error")
+            console.log('websocket: error')
         }
     })
 })
 
 client.on('message', function (topic, message) {
-    // message is Buffer
-    console.log(topic, message.toString())
+    //console.log(topic, message.toString())
     var parts = topic.split('/')
-    //[ 'homee', 'devices', '200', 'set', 'attributes', '1051' ]
-    if(parts[0]=='homee' && parts[1]=='devices' && parts[3]=='set' && parts[4]=='attributes'){
-        var device = parts[2]
+    //[ 'homee', 'devices', 'set', '200', 'attributes', '1051' ]
+    if (
+        parts[0] == 'homee' &&
+        parts[1] == 'devices' &&
+        parts[2] == 'set' &&
+        parts[4] == 'attributes'
+    ) {
+        var device = parts[3]
         var attribute = parts[5]
         if (mySocket != null) {
-            console.log('PUT:/nodes/' + device + '/attributes/' + attribute + '?target_value=' + message)
-            mySocket.send('PUT:/nodes/' + device + '/attributes/' + attribute + '?target_value=' + message)
-        }        
+            var putMessage = 'PUT:/nodes/' +
+                device +
+                '/attributes/' +
+                attribute +
+                '?target_value=' +
+                message
+            console.log(putMessage)
+            mySocket.send(putMessage)
+        }
     }
-    //client.end()
 })
 
-var state=2
+var state = 2
 function doStuff() {
     // code to run
     // or just nothing
-    if(false && mySocket != null) {
-        console.log('PUT:/nodes/' + '200' + '/attributes/' + '1051' + '?target_value=' + state % 2)
-        mySocket.send('PUT:/nodes/' + '200' + '/attributes/' + '1051' + '?target_value=' + state % 2)
-        state++
+}
+
+function killProcess() {
+    if (process.exitTimeoutId) {
+        return;
     }
+
+    process.exitTimeoutId = setTimeout(process.exit, 1000);
+    console.log('\nprocess will exit in 1 second');
+
+    client.end()
+    mySocket.terminate()
 }
 
 function run() {
+
+    // https://nodejs.org/api/process.html#process_signal_events
+    process.on('SIGTERM', killProcess);
+    process.on('SIGINT', killProcess);
+    process.on('uncaughtException', function (e) {
+        killProcess();
+    });    
+
     setInterval(doStuff, 30000)
 }
 
 run()
-
-//console.log(JSON.stringify(element, null, 4))

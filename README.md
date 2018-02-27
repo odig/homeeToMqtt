@@ -16,12 +16,26 @@ This tool publish state changes to MQTT and subcribes topics to change state of 
 
 MQTT messages are easily to subscribe in Node-Red, Homebridge or Hass.io
 
+## config.json
+Create a config.json in same folder ad the app and adjust it to your needs
+
+    {
+        "homeeUserName": "mqtt",
+        "homeePassword": "mqtt",
+        "homeeServer": "homee.fritz.box",
+        "mqttServer": "matt.fritz.box",
+        "mqttUserName": "mqtt",
+        "mqttPassword": "mqtt",
+        "publish": true,
+        "subscribe": true
+    }
+
 ## MQTT
 ### published topics from homeeToMqtt
-    homee/devices/[DeviceId]/attributes/[AttributeId]
+    homee/devices/status/[DeviceId]/attributes/[AttributeId]
 
 ##### Example Topic
-    homee/devices/200/attributes/1051
+    homee/devices/status/200/attributes/1051
 
 ##### Example Topic
     Payload:
@@ -51,10 +65,10 @@ MQTT messages are easily to subscribe in Node-Red, Homebridge or Hass.io
     }
 
 #### MQTT subscribed topics from homeeToMqtt
-    homee/devices/[DeviceId]/set/attributes/[AttributeId]
+    homee/devices/set/[DeviceId]/attributes/[AttributeId]
 
 ##### Example Topic
-    homee/devices/200/set/attributes/1051
+    homee/devices/set/200/attributes/1051
 
 ##### Example Topic
     1
