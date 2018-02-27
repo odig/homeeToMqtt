@@ -1,0 +1,285 @@
+[
+    {
+        "id": "3fd6f2c9.c8627e",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Büro Gang ein",
+        "topic": "homee/devices/set/200/attributes/1051",
+        "payload": "1",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 150,
+        "y": 440,
+        "wires": [
+            [
+                "9691217f.5e4c7",
+                "dd535bb4.5b6158"
+            ]
+        ]
+    },
+    {
+        "id": "9691217f.5e4c7",
+        "type": "mqtt out",
+        "z": "caa1ae2f.1a5e",
+        "name": "",
+        "topic": "",
+        "qos": "0",
+        "retain": "false",
+        "broker": "8919153a.2862b8",
+        "x": 610,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "13996c7d.2b2714",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Büro Gang aus",
+        "topic": "homee/devices/set/200/attributes/1051",
+        "payload": "0",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 160,
+        "y": 480,
+        "wires": [
+            [
+                "9691217f.5e4c7",
+                "dd535bb4.5b6158"
+            ]
+        ]
+    },
+    {
+        "id": "dd535bb4.5b6158",
+        "type": "debug",
+        "z": "caa1ae2f.1a5e",
+        "name": "",
+        "active": false,
+        "console": "false",
+        "complete": "false",
+        "x": 630,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "6da139ac.5b69d8",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Permudo ein",
+        "topic": "homee/devices/set/177/attributes/913",
+        "payload": "1",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 150,
+        "y": 740,
+        "wires": [
+            [
+                "9691217f.5e4c7",
+                "dd535bb4.5b6158"
+            ]
+        ]
+    },
+    {
+        "id": "576ea4ae.7e404c",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Permudo aus",
+        "topic": "homee/devices/set/177/attributes/913",
+        "payload": "0",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 150,
+        "y": 780,
+        "wires": [
+            [
+                "9691217f.5e4c7",
+                "dd535bb4.5b6158"
+            ]
+        ]
+    },
+    {
+        "id": "ce9038ce.fc16a8",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Thermostat Essecke Spirit 24",
+        "topic": "homee/devices/set/163/attributes/833",
+        "payload": "24",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 200,
+        "y": 860,
+        "wires": [
+            [
+                "9691217f.5e4c7",
+                "dd535bb4.5b6158"
+            ]
+        ]
+    },
+    {
+        "id": "325b6591.ac9f8a",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Thermostat Essecke Spirit 22",
+        "topic": "homee/devices/set/163/attributes/833",
+        "payload": "22",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 200,
+        "y": 900,
+        "wires": [
+            [
+                "9691217f.5e4c7",
+                "dd535bb4.5b6158"
+            ]
+        ]
+    },
+    {
+        "id": "8847b561.9a39c8",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Jalousie Küche schließen (90%)",
+        "topic": "homee/devices/set/27/attributes/248",
+        "payload": "90",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 210,
+        "y": 960,
+        "wires": [
+            [
+                "dd535bb4.5b6158",
+                "9691217f.5e4c7"
+            ]
+        ]
+    },
+    {
+        "id": "c733f102.2b231",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Jalousie Küche schließen (100%)",
+        "topic": "homee/devices/set/27/attributes/248",
+        "payload": "100",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 210,
+        "y": 1000,
+        "wires": [
+            [
+                "9691217f.5e4c7",
+                "dd535bb4.5b6158"
+            ]
+        ]
+    },
+    {
+        "id": "2830a785.fbf538",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Büro Gang Helligkeit 100%",
+        "topic": "homee/devices/set/200/attributes/1052",
+        "payload": "100",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 190,
+        "y": 520,
+        "wires": [
+            [
+                "9691217f.5e4c7",
+                "dd535bb4.5b6158"
+            ]
+        ]
+    },
+    {
+        "id": "894bff4a.a5bd9",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Büro Gang Helligkeit 20%",
+        "topic": "homee/devices/set/200/attributes/1052",
+        "payload": "20",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 190,
+        "y": 560,
+        "wires": [
+            [
+                "9691217f.5e4c7",
+                "dd535bb4.5b6158"
+            ]
+        ]
+    },
+    {
+        "id": "387d0e1b.603702",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Büro Gang Farbtemeratur 2702k",
+        "topic": "homee/devices/set/200/attributes/1054",
+        "payload": "2702",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 210,
+        "y": 600,
+        "wires": [
+            [
+                "9691217f.5e4c7",
+                "dd535bb4.5b6158"
+            ]
+        ]
+    },
+    {
+        "id": "38436412.e3144c",
+        "type": "inject",
+        "z": "caa1ae2f.1a5e",
+        "name": "Büro Gang Farbtemeratur 1200k",
+        "topic": "homee/devices/set/200/attributes/1054",
+        "payload": "1200",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 210,
+        "y": 640,
+        "wires": [
+            [
+                "9691217f.5e4c7",
+                "dd535bb4.5b6158"
+            ]
+        ]
+    },
+    {
+        "id": "8919153a.2862b8",
+        "type": "mqtt-broker",
+        "z": "",
+        "broker": "ds1515.fritz.box",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": true,
+        "keepalive": "60",
+        "cleansession": true,
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": ""
+    }
+]

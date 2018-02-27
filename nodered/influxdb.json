@@ -1,0 +1,81 @@
+[
+    {
+        "id": "1ff196bc.a17e89",
+        "type": "mqtt in",
+        "z": "caa1ae2f.1a5e",
+        "name": "",
+        "topic": "homee/devices/status/#",
+        "qos": "2",
+        "broker": "8919153a.2862b8",
+        "x": 172,
+        "y": 199,
+        "wires": [
+            [
+                "583c458d.4842ac"
+            ]
+        ]
+    },
+    {
+        "id": "ebd87ce4.914c1",
+        "type": "function",
+        "z": "caa1ae2f.1a5e",
+        "name": "",
+        "func": "var tokens = msg.topic.split(\"/\");\nif(!msg.payload.unit) {\n    msg.payload.unit='n/a'\n}\nmsg.url =\"http://ds1515.fritz.box:8086/write?db=homee\";\nmsg.payload = \"status\" + \",node=\" + msg.payload.name.replace(/\\s+/g, '_') + \",topic=\" + msg.payload.type + \",unit=\" + msg.payload.unit + \" value=\" + msg.payload.data;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 470,
+        "y": 200,
+        "wires": [
+            [
+                "9c70e626.2b6de8"
+            ]
+        ]
+    },
+    {
+        "id": "9c70e626.2b6de8",
+        "type": "http request",
+        "z": "caa1ae2f.1a5e",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "url": "",
+        "tls": "",
+        "x": 610,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "583c458d.4842ac",
+        "type": "json",
+        "z": "caa1ae2f.1a5e",
+        "name": "",
+        "pretty": "false",
+        "x": 350,
+        "y": 200,
+        "wires": [
+            [
+                "ebd87ce4.914c1"
+            ]
+        ]
+    },
+    {
+        "id": "8919153a.2862b8",
+        "type": "mqtt-broker",
+        "z": "",
+        "broker": "ds1515.fritz.box",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": true,
+        "keepalive": "60",
+        "cleansession": true,
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": ""
+    }
+]
