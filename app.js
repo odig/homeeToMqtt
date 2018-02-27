@@ -42,7 +42,9 @@ const homeePassword = sha512(config.homeePassword) //'8b6717d4a69717640022f88307
 
 //vars
 var mqttAvailable = false
-var mySocket = null
+var mqttConnection = null
+var homeeSocket = null
+var terminating = false
 
 //node nodes
 nodes = []
@@ -104,7 +106,7 @@ function generateAttributeInfo(nodeId, attribute) {
                 if (config.publish) {
                     var publishString = 'homee/devices/status/' + nodeId.toString() + '/attributes/' + id.toString()
                     //console.log(publishString, JSON.stringify(mqttJson, null, 4))
-                    client.publish(publishString, JSON.stringify(mqttJson))
+                    mqttConnection.publish(publishString, JSON.stringify(mqttJson))
                 }
                 if (config.subscribe) {
                     if (
@@ -114,12 +116,11 @@ function generateAttributeInfo(nodeId, attribute) {
                         type == 'CurrentPosition'
                     ) {
                         var subscribeString = 'homee/devices/set/' + nodeId.toString() + '/attributes/' + id.toString()
-                        client.subscribe(subscribeString, null, function (err, granted) {
+                        mqttConnection.subscribe(subscribeString, null, function (err, granted) {
                             if (!err) {
-                                console.log(nodeId + ' "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
+                                console.log('(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
                             }
-                        }
-                        )
+                        })
                     }
                 }
             }
@@ -211,23 +212,17 @@ var data = {
 }
 //console.log('data: ' + JSON.stringify(data, null, 4))
 
-const urlData = Object.keys(data)
-    .map(function (key) {
-        return encodeURIComponent(key) + '=' + encodeURIComponent(data[key])
-    })
-    .join('&')
-//console.log('data: ' + urlData)
+function homeeConnect() {
+    const urlData = Object.keys(data)
+        .map(function (key) {
+            return encodeURIComponent(key) + '=' + encodeURIComponent(data[key])
+        })
+        .join('&')
+    //console.log('data: ' + urlData)
 
-var url = 'http://' + config.homeeServer + ':7681/access_token'
-//console.log('url: ' + url)
+    var url = 'http://' + config.homeeServer + ':7681/access_token'
+    //console.log('url: ' + url)
 
-const client = mqtt.connect('mqtt://' + config.mqttServer, {
-    username: config.mqttUserName,
-    password: config.mqttPassword
-})
-
-client.on('connect', function () {
-    mqttAvailable = true
     fetch(url, {
         method: 'POST',
         headers: headers,
@@ -244,52 +239,67 @@ client.on('connect', function () {
             ':7681/connection?access_token=' +
             token[1]
         //Create new WebSocket
-        mySocket = new WebSocket(connection, ['v2'])
-        //console.log(mySocket)
+        homeeSocket = new WebSocket(connection, ['v2'])
+        //console.log(homeeSocket)
         // Attach listeners
-        mySocket.onmessage = function (event) {
+        homeeSocket.onmessage = function (event) {
             var j = JSON.parse(event.data)
             muxCommand(j)
             //console.log(JSON.stringify(j, null, 4))
         }
-        mySocket.onopen = function (event) {
+        homeeSocket.onopen = function (event) {
             console.log('websocket: open')
             console.log('----------------------------------------')
-            mySocket.send('GET:all')
+            homeeSocket.send('GET:all')
         }
-        mySocket.onclose = function (event) {
+        homeeSocket.onclose = function (event) {
             console.log('websocket: close')
+            if(!terminating) {
+                setTimeout(homeeConnect, 10000);
+            }
         }
-        mySocket.onerror = function (event) {
+        homeeSocket.onerror = function (event) {
             console.log('websocket: error')
         }
     })
-})
+}
 
-client.on('message', function (topic, message) {
-    //console.log(topic, message.toString())
-    var parts = topic.split('/')
-    //[ 'homee', 'devices', 'set', '200', 'attributes', '1051' ]
-    if (
-        parts[0] == 'homee' &&
-        parts[1] == 'devices' &&
-        parts[2] == 'set' &&
-        parts[4] == 'attributes'
-    ) {
-        var device = parts[3]
-        var attribute = parts[5]
-        if (mySocket != null) {
-            var putMessage = 'PUT:/nodes/' +
-                device +
-                '/attributes/' +
-                attribute +
-                '?target_value=' +
-                message
-            console.log(putMessage)
-            mySocket.send(putMessage)
+function mqttConnect() {
+    mqttConnection = mqtt.connect('mqtt://' + config.mqttServer, {
+        username: config.mqttUserName,
+        password: config.mqttPassword
+    })
+
+    mqttConnection.on('connect', function () {
+        mqttAvailable = true
+        homeeConnect()
+    })
+
+    mqttConnection.on('message', function (topic, message) {
+        //console.log(topic, message.toString())
+        var parts = topic.split('/')
+        //[ 'homee', 'devices', 'set', '200', 'attributes', '1051' ]
+        if (
+            parts[0] == 'homee' &&
+            parts[1] == 'devices' &&
+            parts[2] == 'set' &&
+            parts[4] == 'attributes'
+        ) {
+            var device = parts[3]
+            var attribute = parts[5]
+            if (homeeSocket != null) {
+                var putMessage = 'PUT:/nodes/' +
+                    device +
+                    '/attributes/' +
+                    attribute +
+                    '?target_value=' +
+                    message
+                console.log(putMessage)
+                homeeSocket.send(putMessage)
+            }
         }
-    }
-})
+    })
+}
 
 var state = 2
 function doStuff() {
@@ -298,6 +308,8 @@ function doStuff() {
 }
 
 function killProcess() {
+    terminating = true
+
     if (process.exitTimeoutId) {
         return;
     }
@@ -305,18 +317,18 @@ function killProcess() {
     process.exitTimeoutId = setTimeout(process.exit, 1000);
     console.log('\nprocess will exit in 1 second');
 
-    client.end()
-    mySocket.terminate()
+    mqttConnection.end()
+    homeeSocket.terminate()
 }
 
 function run() {
-
-    // https://nodejs.org/api/process.html#process_signal_events
     process.on('SIGTERM', killProcess);
     process.on('SIGINT', killProcess);
     process.on('uncaughtException', function (e) {
         killProcess();
     });    
+
+    mqttConnect()
 
     setInterval(doStuff, 30000)
 }
