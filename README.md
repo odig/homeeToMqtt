@@ -17,7 +17,7 @@ This tool publish state changes to MQTT and subcribes topics to change state of 
 MQTT messages are easily to subscribe in Node-Red, Homebridge or Hass.io
 
 ## config.json
-Create a config.json in same folder ad the app and adjust it to your needs
+Create a config.json in same folder as the app and adjust it to your needs
 
     {
         "homeeUserName": "mqtt",
