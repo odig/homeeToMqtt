@@ -1,0 +1,15 @@
+[Service]
+ExecStart=/home/pi/.nvm/versions/node/v8.9.4/bin/node /home/pi/homeeToMqtt/app.js
+Restart=always
+RestartSec=10                       # Restart service after 10 seconds if node service crashes
+StandardOutput=syslog               # Output to syslog
+StandardError=syslog                # Output to syslog
+SyslogIdentifier=homeeToMqtt
+WorkingDirectory=/home/pi/homeeToMqtt
+User=pi
+#Group=<alternate group>
+Environment=NODE_ENV=production PORT=8000
+
+[Install]
+WantedBy=multi-user.target
+
