@@ -1,0 +1,80 @@
+#!/bin/bash
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+
+if [ ! -z $1 ]; then
+    MQTTUSER=$1
+fi
+
+if [ ! -z $2 ]; then
+    MQTTPASSWD=$2
+fi
+
+if [ ! -z $3 ]; then
+    HOMEEUSER=$3
+fi
+
+if [ ! -z $4 ]; then
+    HOMEEPASSWD=$4
+fi
+
+if [ ! -z $5 ]; then
+    HOMEESERVER=$5
+fi
+
+if [ ! -z $6 ]; then
+    MQTTSERVER=$6
+fi
+
+if [ -z $MQTTUSER ]; then
+    MQTTUSER="mqtt"
+fi
+
+if [ -z $MQTTPASSWD ]; then
+    MQTTPASSWD="mqtt"
+fi
+
+if [ -z $HOMEEUSER ]; then
+    HOMEEUSER="mqtt"
+fi
+
+if [ -z $HOMEEPASSWD ]; then
+    HOMEEPASSWD="mqtt"
+fi
+
+if [ -z $HOMEESERVER ]; then
+    HOMEESERVER="homee.fritz.box"
+fi
+
+if [ -z $MQTTSERVER ]; then
+    MQTTSERVER="localhost"
+fi
+
+cat >${SCRIPT_DIR}/../config.json <<EOF
+{
+    "homeeUserName": "${HOMEEUSER}",
+    "homeePassword": "${HOMEEPASSWD}",
+    "homeeServer": "${HOMEESERVER}",
+    "mqttServer": "${MQTTSERVER}",
+    "mqttUserName": "${MQTTUSER}",
+    "mqttPassword": "${MQTTPASSWD}",
+    "publish": true,
+    "subscribe": true
+}
+EOF
+
+if ! nodejs -v >/dev/null; then
+    sudo apt install -y node
+fi
+
+if ! npm -v >/dev/null; then
+    sudo apt install -y npm
+fi
+
+cd ${SCRIPT_DIR}/..
+npm install
+
+sudo cp ${SCRIPT_DIR}/../homeeToMqtt.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable homeeToMqtt
+sudo systemctl start homeeToMqtt
+

@@ -1,5 +1,6 @@
 [Service]
-ExecStart=/home/pi/.nvm/versions/node/v8.9.4/bin/node /home/pi/homeeToMqtt/app.js
+#ExecStart=/home/pi/.nvm/versions/node/v8.9.4/bin/node /home/pi/homeeToMqtt/app.js
+ExecStart=/usr/bin/nodejs /home/pi/homeeToMqtt/app.js
 Restart=always
 RestartSec=10                       # Restart service after 10 seconds if node service crashes
 StandardOutput=syslog               # Output to syslog
