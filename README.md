@@ -16,6 +16,16 @@ This tool publish state changes to MQTT and subcribes topics to change state of 
 
 MQTT messages are easily to subscribe in Node-Red, Homebridge or Hass.io
 
+## Installation
+just clone the repo and change directory in cloned repo.
+Install all dependencies with:
+
+    npm i
+
+and run with:
+
+    node app.js
+
 ## config.json
 Create a config.json in same folder as the app and adjust it to your needs
 
