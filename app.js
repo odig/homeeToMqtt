@@ -68,6 +68,7 @@ function generateAttributeInfo(nodeId, attribute) {
     var changed = true
     if (nodes[nodeId] != null) {
         var type = homee.getHAPTypeByAttributeType(attribute.type)
+        typeString = homee.getAttributeString(attribute.type)
         var id = attribute.id
         var unit = querystring.unescape(attribute.unit)
         var data = ''
@@ -83,6 +84,7 @@ function generateAttributeInfo(nodeId, attribute) {
         }
 
         nodes[nodeId].attributes[id].type = type
+        nodes[nodeId].attributes[id].typeString = typeString
         nodes[nodeId].attributes[id].unit = unit
         if (nodes[nodeId].attributes[id].data == data) {
             changed = false
@@ -92,12 +94,13 @@ function generateAttributeInfo(nodeId, attribute) {
         if (changed) {
             console.log(
                 '(' + nodeId + ')' + '"' + nodes[nodeId].name + '", ',
-                '(' + id + '/' + attribute.type + ')' + type + ', ',
+                '(' + id + '/' + typeString + '=' + attribute.type + ') ' + type + ', ',
                 data + unit
             )
             //console.log(JSON.stringify(attribute,null,4))
             if (mqttAvailable) {
                 var mqttJson = Object.assign(attribute)
+                mqttJson.typeString = typeString
                 mqttJson.cubeType = nodes[nodeId].cubeType
                 mqttJson.name = nodes[nodeId].name
                 mqttJson.note = nodes[nodeId].note
