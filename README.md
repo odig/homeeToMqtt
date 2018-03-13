@@ -27,7 +27,12 @@ and run with:
     node app.js
 
 ## config.json
-Create a config.json in same folder as the app and adjust it to your needs
+homeeToMqtt looks for config.json in following order:
+ - actual directory
+ - /etc/homeeToMqtt
+ - installed directory
+
+Create a config.json in the desired folder as the app and adjust it to your needs
 
     {
         "homeeUserName": "mqtt",
@@ -62,6 +67,7 @@ Create a config.json in same folder as the app and adjust it to your needs
         "step_value":1,
         "editable":1,
         "type":1,
+        "typeString":"OnOff",
         "state":1,
         "last_changed":1519675682,
         "changed_by":1,
