@@ -10,7 +10,11 @@
     "homeeToMqtt": "./app.js"
   },
   "author": "Gido Kuechler",
-  "license": "none",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/odig/homeeToMqtt.git"
+  },
   "dependencies": {
     "buffer": "^5.0.8",
     "config.json": "0.0.4",
