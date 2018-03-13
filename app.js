@@ -12,8 +12,32 @@
 }
 */
 
+var fs = require('fs');
+
 // config
-var config = require('config.json')('./config.json')
+var config
+var path
+
+path = process.cwd() + '/config.json'
+console.log("look for config " + path)
+if (fs.existsSync(path)) {
+    var config = require('config.json')(path)
+} else {
+    path = '/etc/homeeToMqtt' + '/config.json'
+    console.log("look for config " + path)
+    if (fs.existsSync(path)) {
+        var config = require('config.json')(path)
+    } else {
+        path = __dirname + '/config.json'
+        console.log("look for config " + path)
+        if (fs.existsSync(path)) {
+            config = require('config.json')(path)
+        } else {
+            console.log("no config.json found --> use defaults")
+            config = require('config.json')
+        }    
+    }    
+}
 
 if (config.homeeUserName == null) config.homeeUserName = 'mqtt'
 if (config.homeePassword == null) config.homeePassword = 'mqtt'
