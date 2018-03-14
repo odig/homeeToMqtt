@@ -49,10 +49,13 @@ Create a config.json in the desired folder as the app and adjust it to your need
         "mqttUserName": "mqtt",
         # use the password for the defined user for the MQTT server in use (leave blank "" if no username/pw is set)
         "mqttPassword": "mqtt",
-        # leave as is, unless you know better
+        # publish homee states to mqtt, leave as is, unless you know better
         "publish": true,
-        # leave as is, unless you know better
-        "subscribe": true
+        # subscribe to mqtt topics, leave as is, unless you know better
+        "subscribe": true,
+        # request full homee states every status timer seconds
+        "homeeStatusRepeat": true,
+        "statusTimer": 180
     }
 
 ## MQTT

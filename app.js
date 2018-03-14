@@ -4,11 +4,13 @@
   "homeeUserName": "mqtt",
   "homeePassword": "mqtt",
   "homeeServer": "homee.fritz.box",
-  "mqttServer": "matt.fritz.box",
+  "mqttServer": "mqtt.fritz.box",
   "mqttUserName": "mqtt",
   "mqttPassword": "mqtt",
   "publish": true,
-  "subscribe": true
+  "subscribe": true,
+  "homeeStatusRepeat": true,
+  "statusTimer": 180
 }
 */
 
@@ -47,6 +49,8 @@ if (config.mqttUserName == null) config.mqttUserName = 'mqtt'
 if (config.mqttPassword == null) config.mqttPassword = 'mqtt'
 if (config.subscribe == null) config.subscribe = true
 if (config.publish == null) config.publish = true
+if (config.homeeStatusRepeat == null) config.homeeStatusRepeat = true
+if (config.statusTimer == null) config.statusTimer = 180
 
 console.log('Config:')
 console.log(JSON.stringify(config, null, 4))
@@ -276,17 +280,20 @@ function homeeConnect() {
             //console.log(JSON.stringify(j, null, 4))
         }
         homeeSocket.onopen = function (event) {
+            homeeAvailable=true
             console.log('websocket: open')
             console.log('----------------------------------------')
             homeeSocket.send('GET:all')
         }
         homeeSocket.onclose = function (event) {
+            homeeAvailable = false
             console.log('websocket: close')
             if(!terminating) {
                 setTimeout(homeeConnect, 10000);
             }
         }
         homeeSocket.onerror = function (event) {
+            homeeAvailable = false
             console.log('websocket: error')
         }
     })
@@ -329,10 +336,10 @@ function mqttConnect() {
     })
 }
 
-var state = 2
 function doStuff() {
-    // code to run
-    // or just nothing
+    if (homeeAvailable == true && config.homeeStatusRepeat) {
+        homeeSocket.send('GET:all')
+    }
 }
 
 function killProcess() {
@@ -358,7 +365,7 @@ function run() {
 
     mqttConnect()
 
-    setInterval(doStuff, 30000)
+    setInterval(doStuff, config.statusTimer*1000)
 }
 
 run()
