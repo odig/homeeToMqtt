@@ -23,12 +23,12 @@ var path
 path = process.cwd() + '/config.json'
 console.log("look for config " + path)
 if (fs.existsSync(path)) {
-    var config = require('config.json')(path)
+    config = require('config.json')(path)
 } else {
     path = '/etc/homeeToMqtt' + '/config.json'
     console.log("look for config " + path)
     if (fs.existsSync(path)) {
-        var config = require('config.json')(path)
+        config = require('config.json')(path)
     } else {
         path = __dirname + '/config.json'
         console.log("look for config " + path)
@@ -36,7 +36,7 @@ if (fs.existsSync(path)) {
             config = require('config.json')(path)
         } else {
             console.log("no config.json found --> use defaults")
-            config = require('config.json')
+            config = {}
         }    
     }    
 }
@@ -64,18 +64,19 @@ const sha512 = require('js-sha512')
 const mqtt = require('mqtt')
 
 //const
-const token_expires = 0
+//const token_expires = 0
 const homeeUser = querystring.escape(config.homeeUserName)
 const homeePassword = sha512(config.homeePassword) //'8b6717d4a69717640022f88307d828d95ce99bce944f418e58445d1c65cd5fe00f5cb774d8f26fd7c56dd95942b3e29463f880be78514fc8dfd78807d3b20dbc'
 
 //vars
 var mqttAvailable = false
 var mqttConnection = null
+var homeeAvailable = false
 var homeeSocket = null
 var terminating = false
 
 //node nodes
-nodes = []
+var nodes = []
 
 //emulate btoa
 global.Buffer = global.Buffer || require('buffer').Buffer
@@ -96,12 +97,12 @@ function generateAttributeInfo(nodeId, attribute) {
     var changed = true
     if (nodes[nodeId] != null) {
         var type = homee.getHAPTypeByAttributeType(attribute.type)
-        typeString = homee.getAttributeString(attribute.type)
+        var typeString = homee.getAttributeString(attribute.type)
         var id = attribute.id
         var unit = querystring.unescape(attribute.unit)
         var data = ''
 
-        if (unit == 'text') {
+        if (unit === 'text') {
             data = decodeURIComponent(attribute.data)
         } else {
             data = attribute.current_value
@@ -114,7 +115,7 @@ function generateAttributeInfo(nodeId, attribute) {
         nodes[nodeId].attributes[id].type = type
         nodes[nodeId].attributes[id].typeString = typeString
         nodes[nodeId].attributes[id].unit = unit
-        if (nodes[nodeId].attributes[id].data == data) {
+        if (nodes[nodeId].attributes[id].data === data) {
             changed = false
         }
         nodes[nodeId].attributes[id].data = data
@@ -141,14 +142,14 @@ function generateAttributeInfo(nodeId, attribute) {
                 }
                 if (config.subscribe) {
                     if (
-                        type == 'OnOff' ||
-                        type == 'Brightness' ||
-                        type == 'TargetTemperature' ||
-                        type == 'CurrentPosition' ||
-                        type == 'ColorTemperature'
+                        type === 'OnOff' ||
+                        type === 'Brightness' ||
+                        type === 'TargetTemperature' ||
+                        type === 'CurrentPosition' ||
+                        type === 'ColorTemperature'
                     ) {
                         var subscribeString = 'homee/devices/set/' + nodeId.toString() + '/attributes/' + id.toString()
-                        mqttConnection.subscribe(subscribeString, null, function (err, granted) {
+                        mqttConnection.subscribe(subscribeString, null, function (err) {
                             if (!err) {
                                 console.log('(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
                             }
@@ -184,8 +185,6 @@ function generateNodeInfo(node) {
             cubeType = 'Unknown'
             break
     }
-
-    var nodeType = homee.getAccessoryTypeByNodeProfile(node.profile)
 
     console.log(node.id)
     console.log(cubeType)
@@ -231,7 +230,7 @@ function muxCommand(command) {
 
 var headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
-    Authorization: 'Basic ' + btoa(homeeUser + ':' + homeePassword)
+    Authorization: 'Basic ' + global.btoa(homeeUser + ':' + homeePassword)
 }
 //console.log('headers: ' + JSON.stringify(headers, null, 4))
 
@@ -279,20 +278,20 @@ function homeeConnect() {
             muxCommand(j)
             //console.log(JSON.stringify(j, null, 4))
         }
-        homeeSocket.onopen = function (event) {
+        homeeSocket.onopen = function () {
             homeeAvailable=true
             console.log('websocket: open')
             console.log('----------------------------------------')
             homeeSocket.send('GET:all')
         }
-        homeeSocket.onclose = function (event) {
+        homeeSocket.onclose = function () {
             homeeAvailable = false
             console.log('websocket: close')
             if(!terminating) {
                 setTimeout(homeeConnect, 10000);
             }
         }
-        homeeSocket.onerror = function (event) {
+        homeeSocket.onerror = function () {
             homeeAvailable = false
             console.log('websocket: error')
         }
@@ -315,10 +314,10 @@ function mqttConnect() {
         var parts = topic.split('/')
         //[ 'homee', 'devices', 'set', '200', 'attributes', '1051' ]
         if (
-            parts[0] == 'homee' &&
-            parts[1] == 'devices' &&
-            parts[2] == 'set' &&
-            parts[4] == 'attributes'
+            parts[0] === 'homee' &&
+            parts[1] === 'devices' &&
+            parts[2] === 'set' &&
+            parts[4] === 'attributes'
         ) {
             var device = parts[3]
             var attribute = parts[5]
