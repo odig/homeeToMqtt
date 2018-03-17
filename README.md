@@ -49,8 +49,12 @@ Create a config.json in the desired folder as the app and adjust it to your need
         "mqttUserName": "mqtt",
         # use the password for the defined user for the MQTT server in use (leave blank "" if no username/pw is set)
         "mqttPassword": "mqtt",
-        # publish homee states to mqtt, leave as is, unless you know better
+        # publish homee states to mqtt as json, leave as is, unless you know better
         "publish": true,
+        # publish homee states to mqtt as single int value, leave as is, unless you know better
+        "publishInt": false,
+        # publish homee states to mqtt as boolen string value (True,False), leave as is, unless you know better
+        "publishBool": true,
         # subscribe to mqtt topics, leave as is, unless you know better
         "subscribe": true,
         # request full homee states every status timer seconds
@@ -61,6 +65,8 @@ Create a config.json in the desired folder as the app and adjust it to your need
 ## MQTT
 ### published topics from homeeToMqtt
     homee/devices/status/[DeviceId]/attributes/[AttributeId]
+    homee/devices/int/[DeviceId]/bool/[AttributeId] 1
+    homee/devices/bool/[DeviceId]/attributes/[AttributeId] True
 
 ##### Example Topic
     homee/devices/status/200/attributes/1051
