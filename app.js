@@ -313,6 +313,13 @@ function homeeConnect() {
                 console.log('websocket: error')
             }
         })
+        .catch(function (err) {
+            console.log("error in fetch:" + err)
+            if (!terminating) {
+                setTimeout(homeeConnect, 10000)
+            }
+            return err;
+        });
 }
 
 function mqttConnect() {
