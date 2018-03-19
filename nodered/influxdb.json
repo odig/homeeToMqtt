@@ -1,70 +1,72 @@
 [
     {
-        "id": "1ff196bc.a17e89",
+        "id": "5dfc6bb4.e52534",
         "type": "mqtt in",
-        "z": "caa1ae2f.1a5e",
+        "z": "31c0f069.6e0ff",
         "name": "",
         "topic": "homee/devices/status/#",
         "qos": "2",
-        "broker": "8919153a.2862b8",
-        "x": 172,
-        "y": 199,
+        "broker": "504010af.ff61a",
+        "x": 222,
+        "y": 480,
         "wires": [
             [
-                "583c458d.4842ac"
+                "bcb26a10.481348"
             ]
         ]
     },
     {
-        "id": "ebd87ce4.914c1",
+        "id": "ebe394cd.94d2f8",
         "type": "function",
-        "z": "caa1ae2f.1a5e",
+        "z": "31c0f069.6e0ff",
         "name": "",
-        "func": "var tokens = msg.topic.split(\"/\");\nif(!msg.payload.unit) {\n    msg.payload.unit='n/a'\n}\nmsg.url =\"http://ds1515.fritz.box:8086/write?db=homee\";\nmsg.payload = \"status\" + \",node=\" + msg.payload.name.replace(/\\s+/g, '_') + \",topic=\" + msg.payload.type + \",unit=\" + msg.payload.unit + \" value=\" + msg.payload.data;\nreturn msg;",
+        "func": "var tokens = msg.topic.split(\"/\");\nif(!msg.payload.unit) {\n    msg.payload.unit='n/a'\n}\nmsg.url =\"http://ds1515.fritz.box:8086/write?u=iot;p=iot;db=iot\";\nmsg.payload = msg.payload.name.replace(/\\s+/g, '_') + \",type=\" + msg.payload.typeString + \",unit=\" + msg.payload.unit + \" value=\" + msg.payload.data;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 470,
-        "y": 200,
+        "x": 570,
+        "y": 482,
         "wires": [
             [
-                "9c70e626.2b6de8"
+                "af0c03c1.c3ea6"
             ]
         ]
     },
     {
-        "id": "9c70e626.2b6de8",
+        "id": "af0c03c1.c3ea6",
         "type": "http request",
-        "z": "caa1ae2f.1a5e",
+        "z": "31c0f069.6e0ff",
         "name": "",
         "method": "POST",
         "ret": "txt",
         "url": "",
         "tls": "",
-        "x": 610,
-        "y": 200,
+        "x": 763.9999885559082,
+        "y": 482.00002098083496,
         "wires": [
             []
         ]
     },
     {
-        "id": "583c458d.4842ac",
+        "id": "bcb26a10.481348",
         "type": "json",
-        "z": "caa1ae2f.1a5e",
+        "z": "31c0f069.6e0ff",
         "name": "",
         "pretty": "false",
-        "x": 350,
-        "y": 200,
+        "x": 409.00000381469727,
+        "y": 482,
         "wires": [
             [
-                "ebd87ce4.914c1"
+                "ea5108c5.9b2c88",
+                "ebe394cd.94d2f8"
             ]
         ]
     },
     {
-        "id": "8919153a.2862b8",
+        "id": "504010af.ff61a",
         "type": "mqtt-broker",
         "z": "",
-        "broker": "ds1515.fritz.box",
+        "name": "",
+        "broker": "localhost",
         "port": "1883",
         "clientid": "",
         "usetls": false,
