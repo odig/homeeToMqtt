@@ -68,6 +68,29 @@ if (config.identifierHuman == null) config.identifierHuman = 'human/'
 if (config.identifierInt == null) config.identifierInt = 'devices/int/'
 if (config.identifierBool == null) config.identifierBool = 'devices/bool/'
 
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    transports: [
+      //
+      // - Write to all logs with level `info` and below to `combined.log` 
+      // - Write all logs error (and below) to `error.log`.
+      //
+      new winston.transports.File({ filename: 'error.log', level: 'error' }),
+      new winston.transports.File({ filename: 'combined.log' })
+    ]
+  });
+  
+  //
+  // If we're not in production then log to the `console` with the format:
+  // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
+  // 
+  if (process.env.NODE_ENV !== 'production') {
+    logger.add(new winston.transports.Console({
+      format: winston.format.simple()
+    }));
+  }
+  
 console.log('Config:')
 console.log(JSON.stringify(config, null, 4))
 
