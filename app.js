@@ -67,7 +67,7 @@ if (config.identifier == null) config.identifier = 'devices/status/'
 if (config.identifierHuman == null) config.identifierHuman = 'human/'
 if (config.identifierInt == null) config.identifierInt = 'devices/int/'
 if (config.identifierBool == null) config.identifierBool = 'devices/bool/'
-
+const winston = require('winston');
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.json(),
