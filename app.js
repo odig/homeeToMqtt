@@ -125,7 +125,14 @@ function generateAttributeInfo(nodeId, attribute) {
         if (unit === 'text') {
             data = decodeURIComponent(attribute.data)
         } else {
-            data = attribute.current_value
+            if (typeof attribute.current_value === 'number' && (unit === '°C' || unit === 'W')) {
+                data = attribute.current_value.toFixed(2)
+            } else {
+                data = attribute.current_value
+            }
+        }
+        if (unit == 'n/a' || unit == 'text' || unit == 'unixtimestamp') {
+            unit=''
         }
 
         if (nodes[nodeId].attributes[id] == null) {
@@ -141,7 +148,7 @@ function generateAttributeInfo(nodeId, attribute) {
         nodes[nodeId].attributes[id].data = data
 
         if (changed) {
-            console.log('(' + nodeId + ') ' + '"' + nodes[nodeId].name + '", ', '(' + id + '/' + typeString + '=' + attribute.type + ') ' + type + ', ', data + unit)
+            console.log('(' + nodeId + ') ' + '"' + nodes[nodeId].name + '", ', '(' + id + '/' + typeString + '=' + attribute.type + ') ' + type + ', ', data+unit)
             //console.log(JSON.stringify(attribute, null, 4))
             if (mqttAvailable) {
                 var mqttJson = Object.assign(attribute)
@@ -164,19 +171,8 @@ function generateAttributeInfo(nodeId, attribute) {
                 }
                 if (config.publishHuman) {
                     var publishString = 'homee/' + config.identifierHuman  + nodes[nodeId].name + '(' + nodeId.toString() + ')/' + type.toString() + '(' + id.toString() + ')' 
-                    if (unit == '') {
-                        mqttdata = data + unit
-                    } else if (unit == 'text') {
-                        mqttdata = data
-                    } else if (unit == 'n/a') {
-                        mqttdata = data
-                    } else if (unit == 'unixtimestamp') {
-                        mqttdata = data
-                    } else {
-                        mqttdata = data + unit
-                    }
-                    //console.log(publishString,mqttdata)
-                    mqttConnection.publish(publishString, mqttdata.toString())
+                    //console.log(publishString, data)
+                    mqttConnection.publish(publishString, data.toString())
                 }
                 if (config.publishInt) {
                     var publishString = 'homee/'+ config.identifierInt + nodeId.toString() + '/attributes/' + id.toString()
@@ -268,6 +264,12 @@ function generateNodeInfo(node) {
     for (var key in node.attributes) {
         generateAttributeInfo(node.id, node.attributes[key])
     }
+
+    if (config.publishHuman) {
+        var publishString = 'homee/' + config.identifierHuman + nodes[node.id].name + '(' + node.id.toString() + ')/' + 'CubeType' + '(' + '0' + ')'
+        mqttConnection.publish(publishString, cubeType)
+    }
+
     console.log('----------------------------------------')
 }
 
