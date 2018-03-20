@@ -8,11 +8,13 @@
   "mqttUserName": "mqtt",
   "mqttPassword": "mqtt",
   "publish": true,
+  "publishHuman": true,
   "publishInt": false,
   "publishBool": true,
   "subscribe": true,
+  "subscribeHuman": true,
   "homeeStatusRepeat": true,
-  "statusTimer": 180
+  "statusTimer": 180,
 }
 */
 
@@ -49,10 +51,12 @@ if (config.homeeServer == null) config.homeeServer = 'homee'
 if (config.mqttServer == null) config.mqttServer = 'mqtt'
 if (config.mqttUserName == null) config.mqttUserName = 'mqtt'
 if (config.mqttPassword == null) config.mqttPassword = 'mqtt'
-if (config.subscribe == null) config.subscribe = true
 if (config.publish == null) config.publish = true
+if (config.publishHuman == null) config.publishHuman = true
 if (config.publishInt == null) config.publishInt = false
 if (config.publishBool == null) config.publishBool = true
+if (config.subscribe == null) config.subscribe = true
+if (config.subscribeHuman == null) config.subscribeHuman = true
 if (config.homeeStatusRepeat == null) config.homeeStatusRepeat = true
 if (config.statusTimer == null) config.statusTimer = 180
 
@@ -106,6 +110,10 @@ function generateAttributeInfo(nodeId, attribute) {
         var unit = querystring.unescape(attribute.unit)
         var data = ''
 
+        if (type === '') {
+            type = typeString
+        }
+
         if (unit === 'text') {
             data = decodeURIComponent(attribute.data)
         } else {
@@ -126,7 +134,7 @@ function generateAttributeInfo(nodeId, attribute) {
 
         if (changed) {
             console.log('(' + nodeId + ') ' + '"' + nodes[nodeId].name + '", ', '(' + id + '/' + typeString + '=' + attribute.type + ') ' + type + ', ', data + unit)
-            //console.log(JSON.stringify(attribute,null,4))
+            //console.log(JSON.stringify(attribute, null, 4))
             if (mqttAvailable) {
                 var mqttJson = Object.assign(attribute)
                 mqttJson.typeString = typeString
@@ -146,6 +154,22 @@ function generateAttributeInfo(nodeId, attribute) {
                     //console.log(publishString, JSON.stringify(mqttJson, null, 4))
                     mqttConnection.publish(publishString, JSON.stringify(mqttJson))
                 }
+                if (config.publishHuman) {
+                    var publishString = 'homee/human/' + nodes[nodeId].cubeType.toString() + '/status/' + nodeId.toString() + '/' + nodes[nodeId].name + '/' + id.toString() + '/' + type.toString()
+                    if (unit == '') {
+                        mqttdata = data + unit
+                    } else if (unit == 'text') {
+                        mqttdata = data
+                    } else if (unit == 'n/a') {
+                        mqttdata = data
+                    } else if (unit == 'unixtimestamp') {
+                        mqttdata = data
+                    } else {
+                        mqttdata = data + unit
+                    }
+                    //console.log(publishString,mqttdata)
+                    mqttConnection.publish(publishString, mqttdata.toString())
+                }
                 if (config.publishInt) {
                     var publishString = 'homee/devices/int/' + nodeId.toString() + '/attributes/' + id.toString()
                     mqttConnection.publish(publishString, mqttJson.data)
@@ -155,21 +179,37 @@ function generateAttributeInfo(nodeId, attribute) {
                     //console.log(publishString, mqttJson.boolData)
                     mqttConnection.publish(publishString, mqttJson.boolData)
                 }
-                if (config.subscribe) {
-                    if (
-                        type === 'OnOff' ||
-                        type === 'Brightness' ||
-                        type === 'TargetTemperature' ||
-                        type === 'CurrentPosition' ||
-                        type === 'ColorTemperature'
-                    ) {
+
+                // subscribe some types
+                if (
+                    type === 'OnOff' ||
+                    type === 'Brightness' ||
+                    type === 'TargetTemperature' ||
+                    type === 'CurrentPosition' ||
+                    type === 'ColorTemperature'
+                ) {
+                    if (config.subscribe) {
                         if (nodes[nodeId].attributes[id].subscribed != true) {
                             var subscribeString = 'homee/devices/set/' + nodeId.toString() + '/attributes/' + id.toString()
                             mqttConnection.subscribe(subscribeString, null, function (err) {
-                                if (!err) {
-                                    console.log('(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
+                                if (err) {
+                                    console.log(err, '(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
                                 } else {
+                                    console.log('(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
                                     nodes[nodeId].attributes[id].subscribed = true
+                                }
+                            })
+                        }
+                    }
+                    if (config.subscribeHuman) {
+                        if (nodes[nodeId].attributes[id].subscribedHuman != true) {
+                            var subscribeString = 'homee/human/' + nodes[nodeId].cubeType.toString() + '/status/' + nodeId.toString() + '/' + nodes[nodeId].name + '/' + id.toString() + '/' + type.toString()
+                            mqttConnection.subscribe(subscribeString, null, function (err) {
+                                if (err) {
+                                    console.log(err, '(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
+                                } else {
+                                    console.log('(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
+                                    nodes[nodeId].attributes[id].subscribedHuman = true
                                 }
                             })
                         }
@@ -274,10 +314,10 @@ function homeeConnect() {
     //console.log('url: ' + url)
 
     fetch(url, {
-            method: 'POST',
-            headers: headers,
-            body: urlData
-        })
+        method: 'POST',
+        headers: headers,
+        body: urlData
+    })
         .then(function (response) {
             return response.text()
         })
@@ -338,29 +378,52 @@ function mqttConnect() {
     })
 
     mqttConnection.on('message', function (topic, message) {
-        //console.log(topic, message.toString())
+        console.log(topic, message.toString())
         var parts = topic.split('/')
         //[ 'homee', 'devices', 'set', '200', 'attributes', '1051' ]
-        if (
-            parts[0] === 'homee' &&
-            parts[1] === 'devices' &&
-            parts[2] === 'set' &&
-            parts[4] === 'attributes'
-        ) {
-            var device = parts[3]
-            var attribute = parts[5]
-            var messageString = message.toString().toLowerCase()
-            if (messageString === 'true') {
-                message = 1
-            }
-            if (messageString === 'false') {
-                message = 0
-            }
+        if (config.subscribe) {
+            if (
+                parts[0] === 'homee' &&
+                parts[1] === 'devices' &&
+                parts[2] === 'set' &&
+                parts[4] === 'attributes'
+            ) {
+                var device = parts[3]
+                var attribute = parts[5]
+                var messageString = message.toString().toLowerCase()
+                if (messageString === 'true') {
+                    message = 1
+                }
+                if (messageString === 'false') {
+                    message = 0
+                }
 
-            if (homeeSocket != null) {
-                var putMessage = 'PUT:/nodes/' + device + '/attributes/' + attribute + '?target_value=' + message
-                console.log(putMessage)
-                homeeSocket.send(putMessage)
+                if (homeeSocket != null) {
+                    var putMessage = 'PUT:/nodes/' + device + '/attributes/' + attribute + '?target_value=' + message
+                    console.log(putMessage)
+                    homeeSocket.send(putMessage)
+                }
+            }
+        }
+        if (config.subscribeHuman) {
+            var device = parts[4]
+            var attribute = parts[6]
+            var messageString = message.toString().toLowerCase()
+            console.log('MESSAGE STRING:', message.toString())
+            if (messageString === '' || messageString === 'null') {
+                console.log('MQTT Send: Ignored')
+            } else {
+                if (messageString === 'true') {
+                    message = 1
+                }
+                if (messageString === 'false') {
+                    message = 0
+                }
+                if (homeeSocket != null) {
+                    var putMessage = 'PUT:/nodes/' + device + '/attributes/' + attribute + '?target_value=' + message
+                    console.log(putMessage)
+                    homeeSocket.send(putMessage)
+                }
             }
         }
     })
