@@ -61,13 +61,13 @@ Create a config.json in the desired folder as the app and adjust it to your need
         "subscribe": true,
         # subscribe to mqtt human fashion mqtt topics, leave as is, unless you know better
         "subscribeHuman": true,
-        # path after hommee for this mode
+        # path after homee for this mode
         "identifier": "devices/status/",
-        # path after hommee for this mode
+        # path after homee for this mode
         "identifierHuman": "human/",
-        # path after hommee for this mode
+        # path after homee for this mode
         "identifierInt": "devices/int/",
-        # path after hommee for this mode
+        # path after homee for this mode
         "identifierBool": "devices/bool/",
 
         # request full homee states every status timer seconds
