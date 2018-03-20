@@ -51,12 +51,25 @@ Create a config.json in the desired folder as the app and adjust it to your need
         "mqttPassword": "mqtt",
         # publish homee states to mqtt as json, leave as is, unless you know better
         "publish": true,
+        # publish homee states to mqtt in a human readable fashion, leave as is, unless you know better
+        "publishHuman": true,        
         # publish homee states to mqtt as single int value, leave as is, unless you know better
         "publishInt": false,
         # publish homee states to mqtt as boolen string value (True,False), leave as is, unless you know better
         "publishBool": true,
         # subscribe to mqtt topics, leave as is, unless you know better
         "subscribe": true,
+        # subscribe to mqtt human fashion mqtt topics, leave as is, unless you know better
+        "subscribeHuman": true,
+        # path after hommee for this mode
+        "identifier": "devices/status/",
+        # path after hommee for this mode
+        "identifierHuman": "human/",
+        # path after hommee for this mode
+        "identifierInt": "devices/int/",
+        # path after hommee for this mode
+        "identifierBool": "devices/bool/",
+
         # request full homee states every status timer seconds
         "homeeStatusRepeat": true,
         "statusTimer": 180
@@ -64,14 +77,27 @@ Create a config.json in the desired folder as the app and adjust it to your need
 
 ## MQTT
 ### published topics from homeeToMqtt
+technical mode:
+
     homee/devices/status/[DeviceId]/attributes/[AttributeId]
+or for human mode:
+
+    homee/human/[AttributeName](DeviceId])/[AttributeType]([AttributeId])
+or for int mode:
+
     homee/devices/int/[DeviceId]/bool/[AttributeId] 1
+or for bool mode:
+
     homee/devices/bool/[DeviceId]/attributes/[AttributeId] True
+    
 
 ##### Example Topic
     homee/devices/status/200/attributes/1051
+    homee/human/Ambylight(187)/Brightness(967)
 
 ##### Example Topic
+technical mode:
+
     Payload:
     {
         "id":1051,
@@ -100,10 +126,14 @@ Create a config.json in the desired folder as the app and adjust it to your need
     }
 
 #### MQTT subscribed topics from homeeToMqtt
+technical mode:
+
     homee/devices/set/[DeviceId]/attributes/[AttributeId]
+human mode:
+
+    homee/human/[AttributeName](DeviceId])/[AttributeType]([AttributeId])
 
 ##### Example Topic
     homee/devices/set/200/attributes/1051
+    homee/human/Ambylight(187)/Brightness(967)
 
-##### Example Topic
-    1
