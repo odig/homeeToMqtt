@@ -22,11 +22,11 @@
 }
 */
 
-var fs = require('fs')
+let fs = require('fs')
 
 // config
-var config
-var path
+let config
+let path
 
 path = process.cwd() + '/config.json'
 console.log('look for config ' + path)
@@ -67,29 +67,6 @@ if (config.identifier == null) config.identifier = 'devices/status/'
 if (config.identifierHuman == null) config.identifierHuman = 'human/'
 if (config.identifierInt == null) config.identifierInt = 'devices/int/'
 if (config.identifierBool == null) config.identifierBool = 'devices/bool/'
-const winston = require('winston');
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.simple(),
-    transports: [
-      //
-      // - Write to all logs with level `info` and below to `combined.log` 
-      // - Write all logs error (and below) to `error.log`.
-      //
-      new winston.transports.File({ filename: 'error.log', level: 'error' }),
-      new winston.transports.File({ filename: 'combined.log' })
-    ]
-  });
-  
-  //
-  // If we're not in production then log to the `console` with the format:
-  // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
-  // 
-  if (process.env.NODE_ENV !== 'production') {
-    logger.add(new winston.transports.Console({
-      format: winston.format.simple()
-    }));
-  }
   
 console.log('Config:')
 console.log(JSON.stringify(config, null, 4))
@@ -108,14 +85,14 @@ const homeeUser = querystring.escape(config.homeeUserName)
 const homeePassword = sha512(config.homeePassword)
 
 //vars
-var mqttAvailable = false
-var mqttConnection = null
-var homeeAvailable = false
-var homeeSocket = null
-var terminating = false
+let mqttAvailable = false
+let mqttConnection = null
+let homeeAvailable = false
+let homeeSocket = null
+let terminating = false
 
 //node nodes
-var nodes = []
+let nodes = []
 
 //emulate btoa
 global.Buffer = global.Buffer || require('buffer').Buffer
@@ -133,13 +110,13 @@ if (typeof atob === 'undefined') {
 
 //the real stuff
 function generateAttributeInfo(nodeId, attribute) {
-    var changed = true
+    let changed = true
     if (nodes[nodeId] != null) {
-        var type = homee.getHAPTypeByAttributeType(attribute.type)
-        var typeString = homee.getAttributeString(attribute.type)
-        var id = attribute.id
-        var unit = querystring.unescape(attribute.unit)
-        var data = ''
+        let type = homee.getHAPTypeByAttributeType(attribute.type)
+        let typeString = homee.getAttributeString(attribute.type)
+        let id = attribute.id
+        let unit = querystring.unescape(attribute.unit)
+        let data = ''
 
         if (type === '') {
             type = typeString
@@ -174,7 +151,7 @@ function generateAttributeInfo(nodeId, attribute) {
             console.log('(' + nodeId + ') ' + '"' + nodes[nodeId].name + '", ', '(' + id + '/' + typeString + '=' + attribute.type + ') ' + type + ', ', data+unit)
             //console.log(JSON.stringify(attribute, null, 4))
             if (mqttAvailable) {
-                var mqttJson = Object.assign(attribute)
+                let mqttJson = Object.assign(attribute)
                 mqttJson.typeString = typeString
                 mqttJson.cubeType = nodes[nodeId].cubeType
                 mqttJson.name = nodes[nodeId].name
@@ -188,17 +165,17 @@ function generateAttributeInfo(nodeId, attribute) {
                     mqttJson.boolData = 'True'
                 }
                 if (config.publish) {
-                    var publishString = 'homee/' + config.identifier  + nodeId.toString() + '/attributes/' + id.toString()
+                    let publishString = 'homee/' + config.identifier  + nodeId.toString() + '/attributes/' + id.toString()
                     //console.log(publishString, JSON.stringify(mqttJson, null, 4))
                     mqttConnection.publish(publishString, JSON.stringify(mqttJson))
                 }
                 if (config.publishHuman) {
-                    var publishString = 'homee/' + config.identifierHuman  + nodes[nodeId].name + '(' + nodeId.toString() + ')/' + type.toString() + '(' + id.toString() + ')' 
+                    let publishString = 'homee/' + config.identifierHuman  + nodes[nodeId].name + '(' + nodeId.toString() + ')/' + type.toString() + '(' + id.toString() + ')' 
                     //console.log(publishString, data)
                     mqttConnection.publish(publishString, data.toString())
                 }
                 if (config.publishInt) {
-                    var publishString = 'homee/'+ config.identifierInt + nodeId.toString() + '/attributes/' + id.toString()
+                    let publishString = 'homee/'+ config.identifierInt + nodeId.toString() + '/attributes/' + id.toString()
                     mqttConnection.publish(publishString, mqttJson.data)
                 }
                 if (config.publishBool) {
@@ -218,7 +195,7 @@ function generateAttributeInfo(nodeId, attribute) {
                 ) {
                     if (config.subscribe) {
                         if (nodes[nodeId].attributes[id].subscribed != true) {
-                            var subscribeString = 'homee/' + config.identifierHuman + 'set/' + nodeId.toString() + '/attributes/' + id.toString()
+                            let subscribeString = 'homee/' + config.identifierHuman + 'set/' + nodeId.toString() + '/attributes/' + id.toString()
                             mqttConnection.subscribe(subscribeString, null, function (err) {
                                 if (err) {
                                     console.log(err, '(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
@@ -231,7 +208,7 @@ function generateAttributeInfo(nodeId, attribute) {
                     }
                     if (config.subscribeHuman) {
                         if (nodes[nodeId].attributes[id].subscribedHuman != true) {
-                            var subscribeString = 'homee/' + config.identifierHuman + nodes[nodeId].name + '(' + nodeId.toString() + ')/' + type.toString() + '(' + id.toString() + ')' 
+                            let subscribeString = 'homee/' + config.identifierHuman + nodes[nodeId].name + '(' + nodeId.toString() + ')/' + type.toString() + '(' + id.toString() + ')' 
                             mqttConnection.subscribe(subscribeString, null, function (err) {
                                 if (err) {
                                     console.log(err, '(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
@@ -254,7 +231,7 @@ function generateNodeInfo(node) {
     //console.log('-----------')
     //console.log(JSON.stringify(node,null,4))
 
-    var cubeType
+    let cubeType
     switch (node.cube_type) {
         case 1:
             cubeType = 'Zwave'
@@ -285,12 +262,12 @@ function generateNodeInfo(node) {
     nodes[node.id].note = querystring.unescape(node.note)
     nodes[node.id].attributes = []
 
-    for (var key in node.attributes) {
+    for (let key in node.attributes) {
         generateAttributeInfo(node.id, node.attributes[key])
     }
 
     if (config.publishHuman) {
-        var publishString = 'homee/' + config.identifierHuman + nodes[node.id].name + '(' + node.id.toString() + ')/' + 'CubeType' + '(' + '0' + ')'
+        let publishString = 'homee/' + config.identifierHuman + nodes[node.id].name + '(' + node.id.toString() + ')/' + 'CubeType' + '(' + '0' + ')'
         mqttConnection.publish(publishString, cubeType)
     }
 
@@ -299,7 +276,7 @@ function generateNodeInfo(node) {
 
 function handleNodes(nodes) {
     if (nodes != null) {
-        for (var i in nodes) {
+        for (let i in nodes) {
             generateNodeInfo(nodes[i])
         }
     }
@@ -321,13 +298,13 @@ function muxCommand(command) {
     }
 }
 
-var headers = {
+let headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     Authorization: 'Basic ' + global.btoa(homeeUser + ':' + homeePassword)
 }
 //console.log('headers: ' + JSON.stringify(headers, null, 4))
 
-var data = {
+let data = {
     device_name: 'homeeToMqtt',
     device_hardware_id: 'homeeToMqtt',
     device_os: 5,
@@ -344,7 +321,7 @@ function homeeConnect() {
         .join('&')
     //console.log('data: ' + urlData)
 
-    var url = 'http://' + config.homeeServer + ':7681/access_token'
+    let url = 'http://' + config.homeeServer + ':7681/access_token'
     //console.log('url: ' + url)
 
     fetch(url, {
@@ -357,15 +334,15 @@ function homeeConnect() {
         })
         .then(function (data) {
             //console.log(data)
-            var token = data.match(/access_token=([^&]*)/)
+            let token = data.match(/access_token=([^&]*)/)
             //console.log('token=' + token[1])
-            var connection = 'ws://' + config.homeeServer + ':7681/connection?access_token=' + token[1]
+            let connection = 'ws://' + config.homeeServer + ':7681/connection?access_token=' + token[1]
             //Create new WebSocket
             homeeSocket = new WebSocket(connection, ['v2'])
             //console.log(homeeSocket)
             // Attach listeners
             homeeSocket.onmessage = function (event) {
-                var j = JSON.parse(event.data)
+                let j = JSON.parse(event.data)
                 muxCommand(j)
                 //console.log(JSON.stringify(j, null, 4))
             }
@@ -398,19 +375,19 @@ function homeeConnect() {
 
 
 function splitHumanTopic(topic) {
-    var matchString = 'homee/' + config.identifierHuman
+    let matchString = 'homee/' + config.identifierHuman
     if (topic.startsWith(matchString)) {
-        var restTopic = topic.slice(matchString.length)
-        var parts = restTopic.split('/')
+        let restTopic = topic.slice(matchString.length)
+        let parts = restTopic.split('/')
 
         if (parts.length >= 2) {
-            var braceIndex = parts[0].lastIndexOf('(')
+            let braceIndex = parts[0].lastIndexOf('(')
             if (braceIndex >= 0) {
-                var deviceId = parseInt(parts[0].slice(braceIndex + 1), 10)
+                let deviceId = parseInt(parts[0].slice(braceIndex + 1), 10)
 
                 braceIndex = parts[1].lastIndexOf('(')
                 if (braceIndex >= 0) {
-                    var attributeId = parseInt(parts[1].slice(braceIndex + 1), 10)
+                    let attributeId = parseInt(parts[1].slice(braceIndex + 1), 10)
                     return {
                         device: deviceId,
                         attribute: attributeId
@@ -441,16 +418,16 @@ function mqttConnect() {
         console.log(topic, message.toString())
         //[ 'homee', 'devices', 'set', '200', 'attributes', '1051' ]
         if (config.subscribe) {
-            var parts = topic.split('/')
+            let parts = topic.split('/')
             if (
                 parts[0] === 'homee' &&
                 parts[1] === 'devices' &&
                 parts[2] === 'set' &&
                 parts[4] === 'attributes'
             ) {
-                var device = parts[3]
-                var attribute = parts[5]
-                var messageString = message.toString().toLowerCase()
+                let device = parts[3]
+                let attribute = parts[5]
+                let messageString = message.toString().toLowerCase()
                 if (messageString === 'true') {
                     message = 1
                 }
@@ -459,16 +436,16 @@ function mqttConnect() {
                 }
 
                 if (homeeSocket != null) {
-                    var putMessage = 'PUT:/nodes/' + device + '/attributes/' + attribute + '?target_value=' + message
+                    let putMessage = 'PUT:/nodes/' + device + '/attributes/' + attribute + '?target_value=' + message
                     console.log(putMessage)
                     homeeSocket.send(putMessage)
                 }
             }
         }
         if (config.subscribeHuman) {
-            var found = splitHumanTopic(topic) 
+            let found = splitHumanTopic(topic) 
             if ( found != null) {
-                var messageString = message.toString().toLowerCase()
+                let messageString = message.toString().toLowerCase()
                 console.log('MESSAGE STRING:', message.toString())
                 if (messageString === '' || messageString === 'null') {
                     console.log('MQTT Send: Ignored')
@@ -480,7 +457,7 @@ function mqttConnect() {
                         message = 0
                     }
                     if (homeeSocket != null) {
-                        var putMessage = 'PUT:/nodes/' + found.device + '/attributes/' + found.attribute + '?target_value=' + message
+                        let putMessage = 'PUT:/nodes/' + found.device + '/attributes/' + found.attribute + '?target_value=' + message
                         console.log(putMessage)
                         homeeSocket.send(putMessage)
                     }
