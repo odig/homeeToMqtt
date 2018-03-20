@@ -190,7 +190,8 @@ function generateAttributeInfo(nodeId, attribute) {
                     type === 'Brightness' ||
                     type === 'TargetTemperature' ||
                     type === 'CurrentPosition' ||
-                    type === 'ColorTemperature'
+                    type === 'ColorTemperature' ||
+                    type === 'HomeeMode'
                 ) {
                     if (config.subscribe) {
                         if (nodes[nodeId].attributes[id].subscribed != true) {
