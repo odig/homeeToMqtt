@@ -25,7 +25,7 @@
 const fs = require('fs')
 // Start Winston Logger
 const winston = require('winston');
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'info';
 const logDir = 'log';
 // Create the log directory if it does not exist
 if (!fs.existsSync(logDir)) {
@@ -38,7 +38,7 @@ const logger = new (winston.Logger)({
     new (winston.transports.Console)({
       timestamp: tsFormat,
       colorize: true,
-      level: 'info'
+      level: env === 'development' ? 'debug' : 'info'
     }),
     new (winston.transports.File)({
       filename: `${logDir}/app.log`,
@@ -216,7 +216,8 @@ function generateAttributeInfo(nodeId, attribute) {
                     type === 'TargetTemperature' ||
                     type === 'CurrentPosition' ||
                     type === 'ColorTemperature' ||
-                    type === 'HomeeMode'
+                    type === 'HomeeMode' ||
+                    type === 'HeatingMode'
                 ) {
                     if (config.subscribe) {
                         if (nodes[nodeId].attributes[id].subscribed != true) {
@@ -226,6 +227,7 @@ function generateAttributeInfo(nodeId, attribute) {
                                     logger.error(err, '(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
                                 } else {
                                     logger.debug('(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
+                                    logger.info('subscribe to (' + nodeId + ') "' + nodes[nodeId].name + '" ' + subscribeString)
                                     nodes[nodeId].attributes[id].subscribed = true
                                 }
                             })
@@ -239,6 +241,7 @@ function generateAttributeInfo(nodeId, attribute) {
                                     logger.error(err, '(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
                                 } else {
                                     logger.debug('(' + nodeId + ') "' + nodes[nodeId].name + '" subscribe: "' + subscribeString + '"')
+                                    logger.info('subscribe to (' + nodeId + ') "' + nodes[nodeId].name + '" ' + subscribeString)
                                     nodes[nodeId].attributes[id].subscribedHuman = true
                                 }
                             })
