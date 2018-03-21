@@ -300,14 +300,10 @@ function muxCommand(command) {
     }
 }
 
-<<<<<<< HEAD
-var headers = {
-=======
 ///////////////////////////////////////////////////////////////////////////////
 //Homee Stuff
 ///////////////////////////////////////////////////////////////////////////////
 let headers = {
->>>>>>> upstream/master
     'Content-Type': 'application/x-www-form-urlencoded',
     Authorization: 'Basic ' + global.btoa(homeeUser + ':' + homeePassword)
 }
@@ -479,59 +475,7 @@ function mqttConnect() {
     })
 
     mqttConnection.on('message', function (topic, message) {
-<<<<<<< HEAD
-        console.log(topic, message.toString())
-        //[ 'homee', 'devices', 'set', '200', 'attributes', '1051' ]
-        if (config.subscribe) {
-            var parts = topic.split('/')
-            if (
-                parts[0] === 'homee' &&
-                parts[1] === 'devices' &&
-                parts[2] === 'set' &&
-                parts[4] === 'attributes'
-            ) {
-                var device = parts[3]
-                var attribute = parts[5]
-                var messageString = message.toString().toLowerCase()
-                if (messageString === 'true') {
-                    message = 1
-                }
-                if (messageString === 'false') {
-                    message = 0
-                }
-
-                if (homeeSocket != null) {
-                    var putMessage = 'PUT:/nodes/' + device + '/attributes/' + attribute + '?target_value=' + message
-                    console.log(putMessage)
-                    homeeSocket.send(putMessage)
-                }
-            }
-        }
-        if (config.subscribeHuman) {
-            var found = splitHumanTopic(topic) 
-            if ( found != null) {
-                var messageString = message.toString().toLowerCase()
-                console.log('MESSAGE STRING:', message.toString())
-                if (messageString === '' || messageString === 'null') {
-                    console.log('MQTT Send: Ignored')
-                } else {
-                    if (messageString === 'true') {
-                        message = 1
-                    }
-                    if (messageString === 'false') {
-                        message = 0
-                    }
-                    if (homeeSocket != null) {
-                        var putMessage = 'PUT:/nodes/' + found.device + '/attributes/' + found.attribute + '?target_value=' + message
-                        console.log(putMessage)
-                        homeeSocket.send(putMessage)
-                    }
-                }
-            }
-        }
-=======
         handleIncommingSubscribedMqttMessage(topic, message)
->>>>>>> upstream/master
     })
 }
 
