@@ -435,8 +435,8 @@ function splitHumanTopic(topic) {
 }
 
 function handleIncommingSubscribedMqttMessage(topic, message) {
-    console.debug(topic)
-    console.debug(message.toString())
+    logger.debug(topic)
+    logger.debug(message.toString())
     //[ 'homee', 'devices', 'set', '200', 'attributes', '1051' ]
     if (config.subscribe) {
         let parts = topic.split('/')
