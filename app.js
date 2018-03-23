@@ -21,22 +21,26 @@
   "statusTimer": 180,
 }
 */
-
+'use strict';
+const version = '0.1.0'
 const fs = require('fs')
 // Start Winston Logger
 const winston = require('winston');
+const moment = require('moment');
 const env = process.env.NODE_ENV || 'info';
 const logDir = 'log';
 // Create the log directory if it does not exist
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir);
 }
-const tsFormat = () => (new Date()).toLocaleTimeString();
+//const tsFormat = () => (new Date()).toLocaleTimeString();
+const tsFormat = () => moment().format('YYYY-MM-DD HH:mm:ss').trim();
+
 const logger = new (winston.Logger)({
   transports: [
     // colorize the output to the console
     new (winston.transports.Console)({
-      timestamp: tsFormat,
+    timestamp: tsFormat,
       colorize: true,
       level: env === 'development' ? 'debug' : 'info'
     }),
@@ -52,7 +56,7 @@ const logger = new (winston.Logger)({
 // config
 let config
 let path
-
+logger.info('Starting homeeToMQTT Version ' + version)
 path = process.cwd() + '/config.json'
 if (fs.existsSync(path)) {
     config = require('config.json')(path)
