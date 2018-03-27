@@ -37,43 +37,45 @@ homeeToMqtt looks for config.json in following order:
 Create a config.json in the desired folder as the app and adjust it to your needs
 
     {
-        # use your username (adding an own user for MQTT is a good idea)
         "homeeUserName": "mqtt",
-        # use the password of the above user
         "homeePassword": "mqtt",
-        # use the hostname or IP of your homee here, ensure it has a static IP oif IP-adress is used
         "homeeServer": "homee.fritz.box",
-        # use the hostname or IP of your MQTT server/broker here (might also be localhost if on the same machine)
         "mqttServer": "matt.fritz.box",
-        # Use the defined user name for the MQTT server in use (might be left blank "" if no username is set)
         "mqttUserName": "mqtt",
-        # use the password for the defined user for the MQTT server in use (leave blank "" if no username/pw is set)
         "mqttPassword": "mqtt",
-        # publish homee states to mqtt as json, leave as is, unless you know better
         "publish": true,
-        # publish homee states to mqtt in a human readable fashion, leave as is, unless you know better
         "publishHuman": true,        
-        # publish homee states to mqtt as single int value, leave as is, unless you know better
         "publishInt": false,
-        # publish homee states to mqtt as boolen string value (True,False), leave as is, unless you know better
         "publishBool": true,
-        # subscribe to mqtt topics, leave as is, unless you know better
         "subscribe": true,
-        # subscribe to mqtt human fashion mqtt topics, leave as is, unless you know better
         "subscribeHuman": true,
-        # path after homee for this mode
         "identifier": "devices/status/",
-        # path after homee for this mode
         "identifierHuman": "human/",
-        # path after homee for this mode
         "identifierInt": "devices/int/",
-        # path after homee for this mode
         "identifierBool": "devices/bool/",
-
-        # request full homee states every status timer seconds
         "homeeStatusRepeat": true,
         "statusTimer": 180
     }
+
+### Parameter description
+- "homeeUserName": use your username (adding an own user for MQTT is a good idea)
+- "homeePassword": use the password of the above user
+- "homeeServer": use the hostname or IP of your homee here, ensure it has a static IP oif IP-adress is used
+- "mqttServer": use the hostname or IP of your MQTT server/broker here (might also be localhost if on the same machine)
+- "mqttUserName": use the defined user name for the MQTT server in use (might be left blank "" if no username is set)
+- "mqttPassword": use the password for the defined user for the MQTT server in use (leave blank "" if no username/pw is set)
+- "publish" publish homee states to mqtt as json
+- "publishHuman": publish homee states to mqtt in a human readable fashion
+- "publishInt" publish homee states to mqtt as single int value
+- "publishBool": publish homee states to mqtt as boolen string value (True,False)
+- "subscribe": subscribe to mqtt topics
+- "subscribeHuman": subscribe to mqtt human fashion mqtt topics
+- "identifier": path after homee for this mode
+- "identifierHuman": path after homee for this mode
+- "identifierInt": path after homee for this mode
+- "identifierBool": path after homee for this mode
+- "homeeStatusRepeat": request full homee states every status timer seconds
+- "statusTimer": time in seconds to send homee full stattus
 
 ## MQTT
 ### published topics from homeeToMqtt
