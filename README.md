@@ -53,6 +53,7 @@ Create a config.json in the desired folder as the app and adjust it to your need
         "identifierHuman": "human/",
         "identifierInt": "devices/int/",
         "identifierBool": "devices/bool/",
+        "filterEchoedMQTTMessages": false,
         "homeeStatusRepeat": true,
         "statusTimer": 180
     }
@@ -74,6 +75,7 @@ Create a config.json in the desired folder as the app and adjust it to your need
 - "identifierHuman": path after homee for this mode
 - "identifierInt": path after homee for this mode
 - "identifierBool": path after homee for this mode
+- "filterEchoedMQTTMessages": if true the next human message with the same MQTT topic as send from homeeToMqtt is ignored. Set it to true, if in human mode every message send from homeeToMqtt is directly receveived from MQTT and send via "put" to homee
 - "homeeStatusRepeat": request full homee states every status timer seconds
 - "statusTimer": time in seconds to send homee full stattus
 
