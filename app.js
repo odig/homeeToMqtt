@@ -487,7 +487,7 @@ function handleIncommingSubscribedMqttMessage(topic, message) {
                         if (messageString === 'false') {
                             message = 0
                         }
-                        if (homeeSocket != null) {
+                        if (homeeSocket != null && nodes[found.device].attributes[found.attribute].data !== message) {
                             let putMessage = 'PUT:/nodes/' + found.device + '/attributes/' + found.attribute + '?target_value=' + message
                             logger.info(putMessage)
                             homeeSocket.send(putMessage)
@@ -549,6 +549,7 @@ function run() {
     process.on('SIGTERM', killProcess)
     process.on('SIGINT', killProcess)
     process.on('uncaughtException', function (e) {
+        logger.info(e)
         killProcess()
     })
 
