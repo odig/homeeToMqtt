@@ -487,10 +487,14 @@ function handleIncommingSubscribedMqttMessage(topic, message) {
                         if (messageString === 'false') {
                             message = 0
                         }
-                        if (homeeSocket != null && nodes[found.device].attributes[found.attribute].data !== message) {
-                            let putMessage = 'PUT:/nodes/' + found.device + '/attributes/' + found.attribute + '?target_value=' + message
-                            logger.info(putMessage)
-                            homeeSocket.send(putMessage)
+                        if (homeeSocket != null) {
+                            if(nodes[found.device].attributes[found.attribute].data.toString() !== message.toString()) {
+                                let putMessage = 'PUT:/nodes/' + found.device + '/attributes/' + found.attribute + '?target_value=' + message
+                                logger.info(putMessage)
+                                homeeSocket.send(putMessage)
+                            } else {
+                                logger.debug(found.device, found.attribute, 'value already set')
+                            }
                         }
                     }
                 }
