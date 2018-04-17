@@ -28,6 +28,8 @@ and run with:
     
 You can optionally use the install scripts in the "rasperry" directory to either install homeeToMQTT and/or install the needed MQTT broker/server (Mosquito) on a RaspBerry PI. Adapt the UserNames and the hostnames in the file itself or change later on in the config.json described below.
 
+Alternatively you could use [**homeean**](https://himpler.com/homeean) to install homeeToMqtt on a Raspberry Pi with a plain vanilla Raspbian installation. homeean is a web based buildtool, which generates an individual buildscript (Bash-Script) for user selected Smart Home Tools to be installed on a Raspberry Pi running on Raspbian. homeeToMQTT is provided as an homeean install option.
+
 ## config.json
 homeeToMqtt looks for config.json in following order:
  - actual directory
