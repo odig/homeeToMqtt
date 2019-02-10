@@ -54,21 +54,19 @@ const logger = new (winston.Logger)({
 let config
 let path
 
-path = process.cwd() + '/config.json'
-if (fs.existsSync(path)) {
-    config = require('config.json')(path)
-} else {
-    path = '/etc/homeeToMqtt' + '/config.json'
+config = {}
+
+paths = [
+    __dirname + '/config.json',
+    '/etc/homeeToMqtt' + '/config.json',
+    process.cwd() + '/config.json'
+]
+
+for (i = 0; i < paths.length; i++) {
+    path = paths[i]
     if (fs.existsSync(path)) {
-        config = require('config.json')(path)
-    } else {
-        path = __dirname + '/config.json'
-        if (fs.existsSync(path)) {
-            config = require('config.json')(path)
-        } else {
-            logger.warn('no config.json found --> use defaults')
-            config = {}
-        }
+        loaded = require('config.json')(path)
+        config = {...config, ...loaded}
     }
 }
 
