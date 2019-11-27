@@ -15,7 +15,7 @@ StandardOutput=syslog
 # Error to syslog:
 StandardError=syslog
 SyslogIdentifier=homeeToMqtt
-WorkingDirectory=/home/n/homeeToMqtt
+WorkingDirectory=/home/pi/homeeToMqtt
 User=pi
 #Group=<alternate group>
 Environment=NODE_ENV=production PORT=8000
