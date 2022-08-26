@@ -383,21 +383,22 @@ function homeeConnect() {
             }
             homeeSocket.onopen = function () {
                 homeeAvailable = true
-                logger.info('Connection to homee @ ' + config.homeeServer + ' sucsessfull')
+                logger.info('Connection to homee @ ' + config.homeeServer + ' successfull')
                 //console.log('websocket: open')
                 //console.log('----------------------------------------')
                 homeeSocket.send('GET:all')
             }
             homeeSocket.onclose = function () {
                 homeeAvailable = false
-                logger.info('Connection to homme closed')
+                logger.info('Connection to homee closed')
                 if (!terminating) {
                     setTimeout(homeeConnect, 10000)
                 }
             }
             homeeSocket.onerror = function () {
                 homeeAvailable = false
-                logger.error('Connection to homee @ ' + config.homeeServer + ' not sucsessfull')
+                logger.error('Connection to homee @ ' + config.homeeServer + ' failed')
+                killProcess(1)
             }
         })
         .catch(function (err) {
@@ -498,6 +499,7 @@ function handleIncommingSubscribedMqttMessage(topic, message) {
 }
 
 function mqttConnect() {
+    logger.info("Connecting to mqtt")
     if (config.mqttUserName) {
         mqttConnection = mqtt.connect('mqtt://' + config.mqttServer, {
             username: config.mqttUserName,
@@ -508,12 +510,14 @@ function mqttConnect() {
     }
 
     mqttConnection.on('connect', function () {
-        mqttAvailable = true
-        homeeConnect()
+        logger.info("mqtt available")
+        mqttAvailable=true
+        if (homeeAvailable === false && !terminating) {
+            homeeConnect()
+        }
     })
-
     mqttConnection.on('message', function (topic, message) {
-        logger.info("received:", topic, message.toString())
+        logger.info("mqtt message received:", topic, message.toString())
         handleIncommingSubscribedMqttMessage(topic, message)
     })
 }
@@ -523,18 +527,21 @@ function mqttConnect() {
 ///////////////////////////////////////////////////////////////////////////////
 function doStuff() {
     if (homeeAvailable == true && config.homeeStatusRepeat) {
+        logger.info("Reconciling all homee status")
         homeeSocket.send('GET:all')
     }
 }
 
-function killProcess() {
+function killProcess(rc) {
     terminating = true
 
     if (process.exitTimeoutId) {
         return
     }
 
-    process.exitTimeoutId = setTimeout(process.exit, 1000)
+    process.exitTimeoutId = setTimeout(function () {
+        process.exit(rc)
+    }, 1000)
     logger.info('process will exit in 1 second')
 
     mqttConnection.end()
@@ -547,7 +554,7 @@ function run() {
     process.on('SIGTERM', killProcess)
     process.on('SIGINT', killProcess)
     process.on('uncaughtException', function (e) {
-        killProcess()
+        killProcess(1)
     })
 
     mqttConnect()
