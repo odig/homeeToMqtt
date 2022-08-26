@@ -1,10 +1,19 @@
+[Unit]
+Description=Runs homeeToMqtt. Edit Service-File to enable reloading everytime Docker is started or restarted.
+#After=docker.service
+#BindsTo=docker.service
+#ReloadPropagatedFrom=docker.service
+
 [Service]
 #ExecStart=/home/pi/.nvm/versions/node/v8.9.4/bin/node /home/pi/homeeToMqtt/app.js
 ExecStart=/usr/bin/nodejs /home/pi/homeeToMqtt/app.js
 Restart=always
-RestartSec=10                       # Restart service after 10 seconds if node service crashes
-StandardOutput=syslog               # Output to syslog
-StandardError=syslog                # Output to syslog
+# Restart service after 10 seconds if node service crashes:
+RestartSec=10
+# Output to syslog:
+StandardOutput=syslog
+# Error to syslog:
+StandardError=syslog
 SyslogIdentifier=homeeToMqtt
 WorkingDirectory=/home/pi/homeeToMqtt
 User=pi
@@ -13,4 +22,3 @@ Environment=NODE_ENV=production PORT=8000
 
 [Install]
 WantedBy=multi-user.target
-
