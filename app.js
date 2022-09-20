@@ -66,7 +66,7 @@ for (i = 0; i < paths.length; i++) {
     path = paths[i]
     if (fs.existsSync(path)) {
         loaded = require('config.json')(path)
-        config = {...config, ...loaded}
+        config = { ...config, ...loaded }
     }
 }
 
@@ -221,7 +221,8 @@ function generateAttributeInfo(nodeId, attribute) {
                     type === 'CurrentPosition' ||
                     type === 'ColorTemperature' ||
                     type === 'HomeeMode' ||
-                    type === 'HeatingMode'
+                    type === 'HeatingMode' ||
+                    type === 'Door'
                 ) {
                     if (config.subscribe) {
                         if (nodes[nodeId].attributes[id].subscribed != true) {
@@ -511,7 +512,7 @@ function mqttConnect() {
 
     mqttConnection.on('connect', function () {
         logger.info("mqtt available")
-        mqttAvailable=true
+        mqttAvailable = true
         if (homeeAvailable === false && !terminating) {
             homeeConnect()
         }
